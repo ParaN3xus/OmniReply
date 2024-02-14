@@ -9,7 +9,6 @@ using static GHTMRM.Utils.Paths;
 using GHTMRM.Core.CsScript;
 using System.Dynamic;
 using static GHTMRM.Utils.ConfigObjects;
-using static System.Collections.Specialized.BitVector32;
 using GHTMRM.MessageObjects;
 using static GHTMRM.Core.Channel;
 
@@ -26,6 +25,7 @@ namespace GHTMRM.Core
         private CsSandBox sandBox;
         private SandBoxGlobals sandBoxGlobals;
         private string storageFolder;
+        private SessionConfig sessionConfig;
 
         public Session(string sessionId, bool isGroup)
         {
@@ -76,9 +76,9 @@ namespace GHTMRM.Core
 
             // enabled plugins
             var sessionConfigJson = File.ReadAllText(storageFolder + "/sessionConfig.json");
-            var sessionConfig = JsonConvert.DeserializeObject<SessionConfig>(sessionConfigJson)!;
+            sessionConfig = JsonConvert.DeserializeObject<SessionConfig>(sessionConfigJson)!;
 
-            enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.Disabled.Any(d => d.Name == p.Name)).ToList();
+            enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.Disabled.Any(d => d == p.Name)).ToList();
 
 
             // init code
@@ -135,7 +135,7 @@ namespace GHTMRM.Core
             scriptThread.Start();
 
 
-            if (!scriptThread.Join(TimeSpan.FromSeconds(7)))
+            if (!scriptThread.Join(TimeSpan.FromSeconds(16)))
             {
                 scriptThread.Interrupt();
                 throw new OperationCanceledException("Timeout!");
@@ -210,6 +210,52 @@ namespace GHTMRM.Core
         {
             sessions.Remove(this);
             Directory.Delete(storageFolder, true);
+            Reload();
+        }
+
+        public bool UpdatePluginSettings(string pluginName, bool enableStatus)
+        {
+            bool updateConfig = false;
+            bool valid = false;
+
+            foreach (var plugin in Plugin.Plugins)
+            {
+                if (plugin.Name == pluginName)
+                {
+                    valid = true;
+                }
+            }
+
+            if (!valid)
+            {
+                return false;
+            }
+
+            if (enableStatus)
+            {
+                if (sessionConfig.Disabled.Contains(pluginName))
+                {
+                    sessionConfig.Disabled.Remove(pluginName);
+                    updateConfig = true;
+                }
+            }
+            else
+            {
+                if (!sessionConfig.Disabled.Contains(pluginName))
+                {
+                    sessionConfig.Disabled.Add(pluginName);
+                    updateConfig = true;
+                }
+            }
+
+            if(updateConfig)
+            {
+                var sessionConfigJson = JsonConvert.SerializeObject(sessionConfig);
+                File.WriteAllText(storageFolder + "/sessionConfig.json", sessionConfigJson);
+            }
+
+            Reload();
+            return true;
         }
 
         public string RunCommand(string msgText, MessageOrigin sender)
@@ -282,7 +328,6 @@ namespace GHTMRM.Core
                     if (args.Length == 2)
                     {
                         Reset();
-
                         return "OK!";
                     }
                     else
@@ -300,8 +345,6 @@ namespace GHTMRM.Core
                             return "Session not found!";
                         }
                         session.Reset();
-
-                        _ = new Session(SessionId, isGroup);
                         return "OK!";
                     }
                 }
@@ -357,11 +400,18 @@ namespace GHTMRM.Core
                         return "OK!";
                     }
                 }
-                else if (args[1] == "disable")
+                else if (args[1] == "disable" || args[1] == "enable")
                 {
-
+                    if (args.Length == 2)
+                    {
+                        return "Invaild plugin to disable!";
+                    }
+                    if (!UpdatePluginSettings(args[2], args[1] == "enable"))
+                    {
+                        return "Plugin not found!";
+                    }
+                    return "OK!";
                 }
-                else
                 {
                     return "Invalid command!";
                 }

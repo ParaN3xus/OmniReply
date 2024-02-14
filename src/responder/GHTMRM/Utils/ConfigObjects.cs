@@ -39,7 +39,7 @@ namespace GHTMRM.Utils
         public class SessionConfig
         {
             [JsonProperty("disabled")]
-            public List<PluginConfig> Disabled = [];
+            public List<string> Disabled = [];
         }
     }
 }
