@@ -1,5 +1,9 @@
 # GHTMRM
 
+General Hyper Text Message Respond Model.
+
+其实是自用垃圾bot框架，不想学onebot所以手搓的一坨，慎用，别看代码怕丢脸。
+
 ## 接口约定
 
 ### bridge->core
