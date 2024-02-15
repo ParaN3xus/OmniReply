@@ -38,6 +38,10 @@ namespace GHTMRM.Core.CsScript
         {
             if (sessionData == null)
                 return null;
+
+            if(!((IDictionary<string, object>)sessionData).ContainsKey(key))
+                return null;
+
             return ((IDictionary<string, object>)sessionData)[key];
         }
 
