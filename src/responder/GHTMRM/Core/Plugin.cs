@@ -48,16 +48,18 @@ namespace GHTMRM.Core
         {
             Plugins.Remove(this);
 
-            foreach(var session in Session.sessions)
+            List<Session> sessions_copy = new(Session.sessions);
+
+            string pluginDir = new(PluginDir);
+            _ = new Plugin(pluginDir);
+
+            foreach (var session in sessions_copy)
             {
                 if(session.enabledPlugins.Contains(this))
                 {
                     session.Reload();
                 }
             }
-
-            string pluginDir = new(PluginDir);
-            Plugins.Add(new Plugin(pluginDir));
         }
 
         public static void InitPlugins()

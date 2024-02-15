@@ -67,6 +67,11 @@ namespace GHTMRM.Core
                 return;
             }
 
+            if (result == string.Empty && msgText.StartsWith('#'))
+            {
+                return;
+            }
+
             List<MessagePart> responseParts;
 
             if(result is List<MessagePart>)
