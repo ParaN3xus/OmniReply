@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using WatsonWebsocket;
 using Newtonsoft.Json;
-using GHTMRM.Core;
+using OmniReply.Core;
 
-namespace GHTMRM
+namespace OmniReply
 {
     internal class Program
     {

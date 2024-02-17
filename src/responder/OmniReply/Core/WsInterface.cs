@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static GHTMRM.Utils.Log;
+using static OmniReply.Utils.Log;
 using WatsonWebsocket;
-using GHTMRM.MessageObjects;
+using OmniReply.MessageObjects;
 
-namespace GHTMRM.Core
+namespace OmniReply.Core
 {
     public class WsInterface
     {

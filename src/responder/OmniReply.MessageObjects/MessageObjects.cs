@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Text;
 
-namespace GHTMRM.MessageObjects
+namespace OmniReply.MessageObjects
 {
     public enum MessageType
     {

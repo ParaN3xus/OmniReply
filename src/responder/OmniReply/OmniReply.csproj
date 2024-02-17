@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GHTMRM.MessageObjects\GHTMRM.MessageObjects.csproj" />
+    <ProjectReference Include="..\OmniReply.MessageObjects\OmniReply.MessageObjects.csproj" />
   </ItemGroup>
 
 </Project>

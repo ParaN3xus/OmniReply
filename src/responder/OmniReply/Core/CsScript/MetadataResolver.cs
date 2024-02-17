@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Reflection;
-using GHTMRM.Utils;
+using OmniReply.Utils;
 
-namespace GHTMRM.Core.CsScript
+namespace OmniReply.Core.CsScript
 {
     public class MetadataResolver : MetadataReferenceResolver
     {
