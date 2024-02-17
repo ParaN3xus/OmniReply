@@ -1,4 +1,4 @@
-﻿using GHTMRM.Utils;
+﻿using OmniReply.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,10 +7,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using static GHTMRM.Utils.Log;
-using static GHTMRM.Utils.Paths;
+using static OmniReply.Utils.Log;
+using static OmniReply.Utils.Paths;
 
-namespace GHTMRM.Core
+namespace OmniReply.Core
 {
     public class Plugin
     {

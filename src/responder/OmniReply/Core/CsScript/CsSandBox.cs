@@ -1,4 +1,4 @@
-﻿using GHTMRM.Utils;
+﻿using OmniReply.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -7,7 +7,7 @@ using System.Dynamic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace GHTMRM.Core.CsScript
+namespace OmniReply.Core.CsScript
 {
     public class CsSandBox
     {

@@ -1,4 +1,4 @@
-# GHTMRM
+# OmniReply
 
 General Hyper Text Message Response Model.
 

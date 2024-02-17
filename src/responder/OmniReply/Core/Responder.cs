@@ -1,13 +1,13 @@
-﻿using GHTMRM.MessageObjects;
+﻿using OmniReply.MessageObjects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static GHTMRM.Core.Channel;
+using static OmniReply.Core.Channel;
 
-namespace GHTMRM.Core
+namespace OmniReply.Core
 {
     public class Responder
     {

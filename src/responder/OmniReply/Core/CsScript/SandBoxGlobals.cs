@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GHTMRM.Core.CsScript
+namespace OmniReply.Core.CsScript
 {
     public class SandBoxGlobals
     {

@@ -1,18 +1,18 @@
-﻿using GHTMRM.Utils;
+﻿using OmniReply.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static GHTMRM.Utils.Paths;
-using GHTMRM.Core.CsScript;
+using static OmniReply.Utils.Paths;
+using OmniReply.Core.CsScript;
 using System.Dynamic;
-using static GHTMRM.Utils.ConfigObjects;
-using GHTMRM.MessageObjects;
-using static GHTMRM.Core.Channel;
+using static OmniReply.Utils.ConfigObjects;
+using OmniReply.MessageObjects;
+using static OmniReply.Core.Channel;
 
-namespace GHTMRM.Core
+namespace OmniReply.Core
 {
     public class Session
     {

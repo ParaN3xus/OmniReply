@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GHTMRM", "GHTMRM\GHTMRM.csproj", "{363B7364-68ED-473C-8AA0-1898E199C9BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniReply", "OmniReply\OmniReply.csproj", "{363B7364-68ED-473C-8AA0-1898E199C9BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHTMRM.MessageObjects", "GHTMRM.MessageObjects\GHTMRM.MessageObjects.csproj", "{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniReply.MessageObjects", "OmniReply.MessageObjects\OmniReply.MessageObjects.csproj", "{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
