@@ -46,19 +46,18 @@ namespace OmniReply.Core
 
         public void Reload()
         {
+            List<Session> sessions_to_reload = (from x in Session.sessions
+                                               where x.enabledPlugins.Contains(this)
+                                               select x).ToList();
+            
             Plugins.Remove(this);
-
-            List<Session> sessions_copy = new(Session.sessions);
 
             string pluginDir = new(PluginDir);
             _ = new Plugin(pluginDir);
 
-            foreach (var session in sessions_copy)
+            foreach (var session in sessions_to_reload)
             {
-                if(session.enabledPlugins.Contains(this))
-                {
-                    session.Reload();
-                }
+                session.Reload();
             }
         }
 
