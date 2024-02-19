@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static OmniReply.Core.Channel;
+using OmniReply.Utils.Config;
 
 namespace OmniReply.Core
 {
@@ -20,10 +21,7 @@ namespace OmniReply.Core
 
         public void OnChatMessage(MessageOrigin sender, ReceivedChatMessage message)
         {
-            var messageParts = message.Content.Parts;
-
-            var msgText = MessageContent.ConvertToString(messageParts);
-
+            // construct session id
             var sessionId = sender.UserId;
             var isGroup = false;
 
@@ -33,17 +31,33 @@ namespace OmniReply.Core
                 isGroup = true;
             }
 
-            var session = Session.sessions.FirstOrDefault(s => s.SessionId == sessionId && s.isGroup == isGroup);
+            // banned session
+            if(GlobalConfig.globalConfig.BannedSessions.Contains((isGroup ? "g/" : "") + sessionId))
+            {
+                return;
+            }
 
 
+            // respond
+            var messageParts = message.Content.Parts;
+            var msgText = MessageContent.ConvertToString(messageParts);
             object? result = null;
             try
             {
+                // search corresponding session, if not found, create a new one
+                var session = Session.sessions.FirstOrDefault(s => s.SessionId == sessionId && s.isGroup == isGroup);
                 if (session == null)
                 {
                     session = new Session(sessionId, isGroup);
                 }
 
+                // banned user
+                if (session.isUserBanned(sender.UserId))
+                {
+                    return;
+                }
+
+                // run the code
                 if(msgText.StartsWith('$'))
                 {
                     result = session.RunCode(msgText);
@@ -62,18 +76,14 @@ namespace OmniReply.Core
                 result = e.Message;
             }
 
-            if (result == null)
+            // check if result is invaild
+            if ((result == null) || (result.ToString() == string.Empty && msgText.StartsWith('#')))
             {
                 return;
             }
 
-            if (result == string.Empty && msgText.StartsWith('#'))
-            {
-                return;
-            }
-
+            // send the result
             List<MessagePart> responseParts;
-
             if(result is List<MessagePart>)
             {
                 responseParts = (List<MessagePart>)result;
@@ -82,7 +92,6 @@ namespace OmniReply.Core
             {
                 responseParts = [MessagePart.FromString(result.ToString() ?? "Ok but (string)result is null.")];
             }
-
             sender.Channel.SendMessage(new SendingMessage
             {
                 Type = (int)MessageType.ChatMessage,
@@ -98,6 +107,5 @@ namespace OmniReply.Core
                 }
             });
         }
-
     }
 }

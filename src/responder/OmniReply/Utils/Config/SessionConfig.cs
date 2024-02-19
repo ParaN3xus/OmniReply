@@ -10,6 +10,7 @@ namespace OmniReply.Utils.Config
 {
     public class SessionConfig
     {
+        [JsonIgnore]
         public string Path = string.Empty;
 
         [JsonProperty("disabled_plugins")]
@@ -18,11 +19,13 @@ namespace OmniReply.Utils.Config
         [JsonProperty("banned_user")]
         private ObservableCollection<string> bannedUser = [];
 
+        [JsonIgnore]
         public ObservableCollection<string> DisabledPlugins
         {
             get { return disabledPlugins; }
         }
 
+        [JsonIgnore]
         public ObservableCollection<string> BannedUser
         {
             get { return bannedUser; }
@@ -36,7 +39,10 @@ namespace OmniReply.Utils.Config
 
         private void UpdateConfig()
         {
-            File.WriteAllText(Path, JsonConvert.SerializeObject(this));
+            if (Path != string.Empty)
+            { 
+                File.WriteAllText(Path, JsonConvert.SerializeObject(this));
+            }
         }
     }
 }

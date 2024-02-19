@@ -10,7 +10,7 @@ namespace OmniReply.Utils.Config
 {
     public class GlobalConfig
     {
-        public static GlobalConfig globalConfig = JsonConvert.DeserializeObject<GlobalConfig>(File.ReadAllText(Paths.ConfigPath))!;
+        public static GlobalConfig globalConfig = InitGlobalConfig();
 
         [JsonProperty("admins")]
         private List<string> admins = [];
@@ -18,12 +18,13 @@ namespace OmniReply.Utils.Config
         [JsonProperty("banned_sessions")]
         private ObservableCollection<string> bannedSessions = [];
 
-
+        [JsonIgnore]
         public List<string> Admins
         {
             get { return admins; }
         }
 
+        [JsonIgnore]
         public ObservableCollection<string> BannedSessions
         {
             get { return bannedSessions; }
@@ -36,7 +37,17 @@ namespace OmniReply.Utils.Config
 
         private void UpdateConfig()
         {
-            File.WriteAllText(File.ReadAllText(Paths.ConfigPath), JsonConvert.SerializeObject(this));
+            File.WriteAllText(Paths.ConfigPath, JsonConvert.SerializeObject(this));
+        }
+
+        private static GlobalConfig InitGlobalConfig()
+        {
+            if(File.Exists(Paths.ConfigPath) == false)
+            {
+                File.WriteAllText(Paths.ConfigPath, "{}");
+            }
+
+            return JsonConvert.DeserializeObject<GlobalConfig>(File.ReadAllText(Paths.ConfigPath))!;
         }
     }
 }

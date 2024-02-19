@@ -110,7 +110,7 @@ namespace OmniReply.Core
             // banned type
             var bannedType = new List<Type>
                             {
-                                //not allow to use System.Reflection.Module,System.AppDomain
+                                //not allow to use 
                                 typeof(System.Reflection.Module),
                                 typeof(System.AppDomain),
                                 typeof(System.Diagnostics.Process),
@@ -195,6 +195,11 @@ namespace OmniReply.Core
             return res;
         }
 
+        public bool isUserBanned(string id)
+        {
+            return sessionConfig.BannedUser.Contains(id);
+        }
+
         public void Remove()
         {
             sessions.Remove(this);
@@ -258,6 +263,7 @@ namespace OmniReply.Core
 
         private static void BanSession(string id, bool ban)
         {
+            string rawid = id;
             if (ban)
             {
                 bool isGroup = false;
@@ -275,11 +281,11 @@ namespace OmniReply.Core
                     sessions.Remove(session);
                 }
 
-                GlobalConfig.globalConfig.BannedSessions.Add(id);
+                GlobalConfig.globalConfig.BannedSessions.Add(rawid);
             }
             else
             {
-                GlobalConfig.globalConfig.BannedSessions.Remove(id);
+                GlobalConfig.globalConfig.BannedSessions.Remove(rawid);
             }
         }
 
@@ -432,7 +438,7 @@ namespace OmniReply.Core
                 ban = args["ban"] == "true";
             }
 
-            if (args.ContainsKey("s"))
+            if (!args.ContainsKey("s"))
             {
                 BanSession((isGroup ? "g/" : "") + SessionId, ban);
             }
@@ -446,7 +452,9 @@ namespace OmniReply.Core
 
         private string RunBanUserCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
+            var gconfig = GlobalConfig.globalConfig;
+
+            if (!gconfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -458,7 +466,7 @@ namespace OmniReply.Core
                 ban = args["ban"] == "true";
             }
 
-            if (args.ContainsKey("s"))
+            if (!args.ContainsKey("s"))
             {
                 Ban(args["id"], ban);
             }
