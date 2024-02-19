@@ -71,8 +71,9 @@ namespace OmniReply.Core
             // enabled plugins
             var sessionConfigJson = File.ReadAllText(storageFolder + "/sessionConfig.json");
             sessionConfig = JsonConvert.DeserializeObject<SessionConfig>(sessionConfigJson)!;
+            sessionConfig.Path = storageFolder + "/sessionConfig.json";
 
-             enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.DisabledPlugins.Any(d => d == p.Name)).ToList();
+            enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.DisabledPlugins.Any(d => d == p.Name)).ToList();
 
 
             // init code
@@ -214,7 +215,7 @@ namespace OmniReply.Core
 
         public bool UpdatePluginSettings(string pluginName, bool enableStatus)
         {
-            bool updateConfig = false;
+            bool reload = false;
             bool valid = false;
 
             foreach (var plugin in Plugin.Plugins)
@@ -235,7 +236,7 @@ namespace OmniReply.Core
                 if (sessionConfig.DisabledPlugins.Contains(pluginName))
                 {
                     sessionConfig.DisabledPlugins.Remove(pluginName);
-                    updateConfig = true;
+                    reload = true;
                 }
             }
             else
@@ -243,44 +244,55 @@ namespace OmniReply.Core
                 if (!sessionConfig.DisabledPlugins.Contains(pluginName))
                 {
                     sessionConfig.DisabledPlugins.Add(pluginName);
-                    updateConfig = true;
+                    reload = true;
                 }
             }
 
-            if(updateConfig)
+            if (reload)
             {
-                var sessionConfigJson = JsonConvert.SerializeObject(sessionConfig);
-                File.WriteAllText(storageFolder + "/sessionConfig.json", sessionConfigJson);
-
                 Reload();
             }
 
             return true;
         }
 
-        private static void BanSession(string id)
+        private static void BanSession(string id, bool ban)
         {
-            bool isGroup = false;
-
-            if (id.StartsWith("g/"))
+            if (ban)
             {
-                id = id[2..];
-                isGroup = true;
+                bool isGroup = false;
+
+                if (id.StartsWith("g/"))
+                {
+                    id = id[2..];
+                    isGroup = true;
+                }
+
+                var session = sessions.FirstOrDefault(s => s.SessionId == id && s.isGroup == isGroup);
+
+                if (session != null)
+                {
+                    sessions.Remove(session);
+                }
+
+                GlobalConfig.globalConfig.BannedSessions.Add(id);
             }
-
-            var session = sessions.FirstOrDefault(s => s.SessionId == id && s.isGroup == isGroup);
-
-            if (session != null)
+            else
             {
-                sessions.Remove(session);
+                GlobalConfig.globalConfig.BannedSessions.Remove(id);
             }
-
-            GlobalConfig.globalConfig.BannedSessions.Add(id);
         }
 
-        private void Ban(string v)
+        private void Ban(string v, bool ban)
         {
-            throw new NotImplementedException();
+            if(ban)
+            {
+                sessionConfig.BannedUser.Add(v);
+            }
+            else
+            {
+                sessionConfig.BannedUser.Remove(v);
+            }
         }
 
         public string RunCommand(string msgText, MessageOrigin sender)
@@ -413,13 +425,20 @@ namespace OmniReply.Core
                 return "Permission denied!";
             }
 
-            if (args.Count == 2)
+            bool ban = true;
+
+            if(args.ContainsKey("ban"))
             {
-                BanSession((isGroup ? "g/" : "") + SessionId);
+                ban = args["ban"] == "true";
+            }
+
+            if (args.ContainsKey("s"))
+            {
+                BanSession((isGroup ? "g/" : "") + SessionId, ban);
             }
             else
             {
-                BanSession(args["s"]);
+                BanSession(args["s"], ban);
             }
 
             return "OK!";
@@ -432,9 +451,16 @@ namespace OmniReply.Core
                 return "Permission denied!";
             }
 
-            if (args.Count == 3)
+            bool ban = true;
+
+            if (args.ContainsKey("ban"))
             {
-                Ban(args["id"]);
+                ban = args["ban"] == "true";
+            }
+
+            if (args.ContainsKey("s"))
+            {
+                Ban(args["id"], ban);
             }
             else
             {
@@ -451,7 +477,7 @@ namespace OmniReply.Core
                     return "Session not found!";
                 }
 
-                session.Ban(args["id"]);
+                session.Ban(args["id"], ban);
             }
 
             return "OK!";

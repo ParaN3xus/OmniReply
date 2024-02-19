@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace OmniReply.Utils.Config
         private List<string> admins = [];
 
         [JsonProperty("banned_sessions")]
-        private List<string> bannedSessions = [];
+        private ObservableCollection<string> bannedSessions = [];
 
 
         public List<string> Admins
@@ -23,14 +24,19 @@ namespace OmniReply.Utils.Config
             get { return admins; }
         }
 
-        public List<string> BannedSessions
+        public ObservableCollection<string> BannedSessions
         {
             get { return bannedSessions; }
-            set
-            {
-                bannedSessions = value;
-                File.WriteAllText(File.ReadAllText(Paths.ConfigPath), JsonConvert.SerializeObject(this));
-            }
+        }
+
+        public GlobalConfig()
+        {
+            bannedSessions.CollectionChanged += (sender, e) => UpdateConfig();
+        }
+
+        private void UpdateConfig()
+        {
+            File.WriteAllText(File.ReadAllText(Paths.ConfigPath), JsonConvert.SerializeObject(this));
         }
     }
 }
