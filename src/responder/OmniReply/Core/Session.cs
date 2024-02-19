@@ -73,7 +73,7 @@ namespace OmniReply.Core
             var sessionConfigJson = File.ReadAllText(storageFolder + "/sessionConfig.json");
             sessionConfig = JsonConvert.DeserializeObject<SessionConfig>(sessionConfigJson)!;
 
-             enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.Disabled.Any(d => d == p.Name)).ToList();
+             enabledPlugins = Plugin.Plugins.Where(p => !sessionConfig.DisabledPlugins.Any(d => d == p.Name)).ToList();
 
 
             // init code
@@ -233,17 +233,17 @@ namespace OmniReply.Core
 
             if (enableStatus)
             {
-                if (sessionConfig.Disabled.Contains(pluginName))
+                if (sessionConfig.DisabledPlugins.Contains(pluginName))
                 {
-                    sessionConfig.Disabled.Remove(pluginName);
+                    sessionConfig.DisabledPlugins.Remove(pluginName);
                     updateConfig = true;
                 }
             }
             else
             {
-                if (!sessionConfig.Disabled.Contains(pluginName))
+                if (!sessionConfig.DisabledPlugins.Contains(pluginName))
                 {
-                    sessionConfig.Disabled.Add(pluginName);
+                    sessionConfig.DisabledPlugins.Add(pluginName);
                     updateConfig = true;
                 }
             }
@@ -257,6 +257,31 @@ namespace OmniReply.Core
             }
 
             return true;
+        }
+
+        private static void BanSession(string id)
+        {
+            bool isGroup = false;
+
+            if (id.StartsWith("g/"))
+            {
+                id = id[2..];
+                isGroup = true;
+            }
+
+            var session = sessions.FirstOrDefault(s => s.SessionId == id && s.isGroup == isGroup);
+
+            if (session != null)
+            {
+                sessions.Remove(session);
+            }
+
+            globalConfig.BannedSessions.Add(id);
+        }
+
+        private void Ban(string v)
+        {
+            throw new NotImplementedException();
         }
 
         public string RunCommand(string msgText, MessageOrigin sender)
@@ -300,11 +325,14 @@ namespace OmniReply.Core
                     return
 @" - help
  - session
- - plugman";
+ - plugman
+ - ban";
                 case "session":
                     return RunSessionCommand(args, sender);
                 case "plugman":
                     return RunPlugmanCommand(args, sender);
+                case "ban":
+                    return RunBanCommand(args, sender);
                 default:
                     return string.Empty;
             }
@@ -359,9 +387,80 @@ namespace OmniReply.Core
             }
         }
 
+        private string RunBanCommand(Dictionary<string, string> args, MessageOrigin sender)
+        {
+            if (args.Count == 1)
+            {
+                return
+@" - user
+ - session";
+            }
+
+            switch (args["subcommand"])
+            {
+                case "user":
+                    return RunBanUserCommand(args, sender);
+                case "session":
+                    return RunBanSessionCommand(args, sender);
+                default:
+                    return "Invalid command!";
+            }
+        }
+
+        private string RunBanSessionCommand(Dictionary<string, string> args, MessageOrigin sender)
+        {
+            if (!globalConfig.Admins.Contains(sender.UserId))
+            {
+                return "Permission denied!";
+            }
+
+            if (args.Count == 2)
+            {
+                BanSession((isGroup ? "g/" : "") + SessionId);
+            }
+            else
+            {
+                BanSession(args["s"]);
+            }
+
+            return "OK!";
+        }
+
+        private string RunBanUserCommand(Dictionary<string, string> args, MessageOrigin sender)
+        {
+            if (!globalConfig.Admins.Contains(sender.UserId))
+            {
+                return "Permission denied!";
+            }
+
+            if (args.Count == 3)
+            {
+                Ban(args["id"]);
+            }
+            else
+            {
+                var isgroup = false;
+                if (args["s"].StartsWith("g/"))
+                {
+                    args["s"] = args["s"][2..];
+                    isgroup = true;
+                }
+                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.isGroup == isgroup);
+
+                if (session == null)
+                {
+                    return "Session not found!";
+                }
+
+                session.Ban(args["id"]);
+            }
+
+            return "OK!";
+        }
+
         private string RunSessionListCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if(!GlobalConfigs.Admins.Contains(sender.UserId))
+            if(!globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -387,7 +486,7 @@ namespace OmniReply.Core
             }
             else
             {
-                if (!GlobalConfigs.Admins.Contains(sender.UserId))
+                if (!globalConfig.Admins.Contains(sender.UserId))
                 {
                     return "Permission denied!";
                 }
@@ -412,7 +511,7 @@ namespace OmniReply.Core
 
         private string RunSessionResetCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!GlobalConfigs.Admins.Contains(sender.UserId))
+            if (!globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -457,7 +556,7 @@ namespace OmniReply.Core
 
         private string RunPlugmanReloadCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!GlobalConfigs.Admins.Contains(sender.UserId))
+            if (!globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -486,7 +585,7 @@ namespace OmniReply.Core
 
         private string RunPlugmanXableCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!GlobalConfigs.Admins.Contains(sender.UserId))
+            if (!globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
