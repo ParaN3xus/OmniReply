@@ -1,5 +1,4 @@
-﻿using OmniReply.Utils;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static OmniReply.Utils.Log;
 using static OmniReply.Utils.Paths;
+using OmniReply.Utils.Config;
 
 namespace OmniReply.Core
 {
@@ -28,7 +28,7 @@ namespace OmniReply.Core
 
         public Plugin(string pluginDir)
         {
-            var config = JsonConvert.DeserializeObject<ConfigObjects.PluginConfig>(File.ReadAllText(pluginDir + "/config.json"))!;
+            var config = JsonConvert.DeserializeObject<PluginConfig>(File.ReadAllText(pluginDir + "/config.json"))!;
 
             Name = config.Name;
 

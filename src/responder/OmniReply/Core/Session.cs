@@ -1,5 +1,4 @@
-﻿using OmniReply.Utils;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +7,9 @@ using System.Threading.Tasks;
 using static OmniReply.Utils.Paths;
 using OmniReply.Core.CsScript;
 using System.Dynamic;
-using static OmniReply.Utils.ConfigObjects;
 using OmniReply.MessageObjects;
 using static OmniReply.Core.Channel;
+using OmniReply.Utils.Config;
 
 namespace OmniReply.Core
 {
@@ -276,7 +275,7 @@ namespace OmniReply.Core
                 sessions.Remove(session);
             }
 
-            globalConfig.BannedSessions.Add(id);
+            GlobalConfig.globalConfig.BannedSessions.Add(id);
         }
 
         private void Ban(string v)
@@ -409,7 +408,7 @@ namespace OmniReply.Core
 
         private string RunBanSessionCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!globalConfig.Admins.Contains(sender.UserId))
+            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -428,7 +427,7 @@ namespace OmniReply.Core
 
         private string RunBanUserCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!globalConfig.Admins.Contains(sender.UserId))
+            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -460,7 +459,7 @@ namespace OmniReply.Core
 
         private string RunSessionListCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if(!globalConfig.Admins.Contains(sender.UserId))
+            if(!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -486,7 +485,7 @@ namespace OmniReply.Core
             }
             else
             {
-                if (!globalConfig.Admins.Contains(sender.UserId))
+                if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
                 {
                     return "Permission denied!";
                 }
@@ -511,7 +510,7 @@ namespace OmniReply.Core
 
         private string RunSessionResetCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!globalConfig.Admins.Contains(sender.UserId))
+            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -556,7 +555,7 @@ namespace OmniReply.Core
 
         private string RunPlugmanReloadCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!globalConfig.Admins.Contains(sender.UserId))
+            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
@@ -585,7 +584,7 @@ namespace OmniReply.Core
 
         private string RunPlugmanXableCommand(Dictionary<string, string> args, MessageOrigin sender)
         {
-            if (!globalConfig.Admins.Contains(sender.UserId))
+            if (!GlobalConfig.globalConfig.Admins.Contains(sender.UserId))
             {
                 return "Permission denied!";
             }
