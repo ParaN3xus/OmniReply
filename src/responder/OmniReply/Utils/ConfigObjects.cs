@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OmniReply.Utils
 {
-    public class ConfigObjects
+    public static class ConfigObjects
     {
         public class PluginConfig
         {
@@ -38,8 +38,39 @@ namespace OmniReply.Utils
 
         public class SessionConfig
         {
-            [JsonProperty("disabled")]
-            public List<string> Disabled = [];
+            [JsonProperty("disabled_plugins")]
+            public List<string> DisabledPlugins = [];
+
+            [JsonProperty("banned_user")]
+            public List<string> BannedUser = [];
         }
+
+
+        public static GlobalConfig globalConfig = JsonConvert.DeserializeObject<GlobalConfig>(File.ReadAllText(Paths.ConfigPath))!;
+        public class GlobalConfig
+        {
+            [JsonProperty("admins")]
+            private List<string> admins = [];
+
+            [JsonProperty("banned_sessions")]
+            private List<string> bannedSessions = [];
+
+
+            public List<string> Admins
+            {
+                get { return admins; }
+            }
+
+            public List<string> BannedSessions
+            {
+                get { return bannedSessions; }
+                set
+                {
+                    bannedSessions = value;
+                    File.WriteAllText(File.ReadAllText(Paths.ConfigPath), JsonConvert.SerializeObject(this));
+                }
+            }
+        }
+
     }
 }

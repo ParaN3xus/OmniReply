@@ -12,5 +12,7 @@ namespace OmniReply.Utils
         public static string SessionsFolder = RootFolder + "/sessions";
         public static string PluginsFolder = RootFolder + "/plugins";
 
+        public static string ConfigPath = "./files/config.json";
+
     }
 }
