@@ -19,7 +19,7 @@ namespace OmniReply.Core
         {
             msgResponder = responder;
             
-            wsServer = new WatsonWsServer("localhost", 8080, false);
+            wsServer = new WatsonWsServer("*", 8123, false);
 
             wsServer.ClientConnected += ClientConnected;
             wsServer.ClientDisconnected += ClientDisconnected;

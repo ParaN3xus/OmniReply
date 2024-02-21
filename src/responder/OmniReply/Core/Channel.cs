@@ -43,6 +43,12 @@ namespace OmniReply.Core
 
         public void SendMessage(SendingMessage message)
         {
+            if(Id == "console")
+            {
+                Console.WriteLine(message.Content);
+                return;
+            }
+
             wsInterface.SendMessage(WsClientId, message);
         }
 
