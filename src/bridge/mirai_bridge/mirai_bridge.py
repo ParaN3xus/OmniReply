@@ -1,16 +1,21 @@
+from io import BytesIO
 import json
+import os
+import random
+import string
 import threading
 import requests
 import websocket
 import base64
 from time import sleep
 from enum import Enum
+from PIL import Image
 
 
 import miraicle
 
 
-ws_uri = "ws://localhost:8080"
+ws_uri = "ws://localhost:8123"
 ws = websocket.WebSocket()
 
 qq = 
@@ -69,6 +74,7 @@ def receive_from_websocket():
 
 
 def react_to_host(msg):
+    pics = []
     if(msg['type'] == message_type.CHAT_MESSAGE.value):
         receiver = msg['receiver']
         msg_chain = []
@@ -76,12 +82,19 @@ def react_to_host(msg):
             if(part['type'] == message_part_type.TEXT.value):
                 msg_chain.append(miraicle.Plain(part['data']))
             elif(part['type'] == message_part_type.IMAGE.value):
-                msg_chain.append(miraicle.Image(base64=base64.b64decode(part['data'])))
+                filename = save_base64_to_file(part['data'])
+                msg_chain.append(miraicle.Image(base64=filename))
+                pics.append(filename)
         if(receiver["group_id"]):
             bot.send_group_msg(group=receiver["group_id"], msg=msg_chain)
         else:
             bot.send_friend_msg(qq=receiver["user_id"], msg=msg_chain)
 
+    for pic in pics:
+        try:
+            os.remove(pic)
+        except:
+            pass
 
 
 def give_id(id):
@@ -103,6 +116,18 @@ def download_file_to_base64(url):
     else:
         print('Failed to download file, status code:', response.status_code)
         return None
+
+def save_base64_to_file(base64_str):
+    image_buffer = BytesIO(base64.b64decode(base64_str))
+    image = Image.open(image_buffer)
+
+    filename = "temp_" + "".join(random.choices(string.ascii_letters + string.digits, k=10)) + ".png"
+    image.save(filename)
+
+    image_buffer.close()
+    image.close()
+
+    return filename
 
 def send_chat_message_to_host(sourceGroup, sourceUser, msg, isGroupChat=False):
     json_obj = {
@@ -150,6 +175,7 @@ if __name__ == '__main__':
     connect_to_websocket()
 
     th1 = threading.Thread(target=receive_from_websocket)
+    th1.daemon = True
     th1.start()
 
     bot.run()
