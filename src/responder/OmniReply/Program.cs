@@ -3,6 +3,7 @@ using WatsonWebsocket;
 using Newtonsoft.Json;
 using OmniReply.Core;
 using OmniReply.MessageObjects;
+using System.Net;
 
 namespace OmniReply
 {
@@ -17,9 +18,23 @@ namespace OmniReply
 
             var consoleChannel = new Channel(wsInterface, responder, Guid.Empty, "console");
 
-            while (true)
+            var isConsoleIn = Console.In.Peek() != -1;
+            while (isConsoleIn)
             {
-                var msg = Console.ReadLine();
+                string msg;
+
+                try
+                {
+                    msg = Console.ReadLine();
+                    if(msg == null)
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    break;
+                }
 
                 consoleChannel.ReceivedChatMessage(new Channel.MessageOrigin
                 {
@@ -39,6 +54,13 @@ namespace OmniReply
                         }
                     }
                 });
+            }
+
+            var sleepSpan = TimeSpan.FromSeconds(60);
+
+            while (true)
+            {
+                Thread.Sleep(sleepSpan);
             }
         }
     }
