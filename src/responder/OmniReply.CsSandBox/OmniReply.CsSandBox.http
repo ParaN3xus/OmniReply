@@ -1,0 +1,6 @@
+@OmniReply.CsSandBox_HostAddress = http://localhost:5259
+
+GET {{OmniReply.CsSandBox_HostAddress}}/run/
+Accept: application/json
+
+###

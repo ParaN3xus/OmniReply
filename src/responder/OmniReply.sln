@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniReply", "OmniReply\Omni
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniReply.MessageObjects", "OmniReply.MessageObjects\OmniReply.MessageObjects.csproj", "{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniReply.CsSandBox", "OmniReply.CsSandBox\OmniReply.CsSandBox.csproj", "{67EB9D7C-19F8-4471-85AF-F8E3C6DE999B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniReply.CommonUtils", "OmniReply.CommonUtils\OmniReply.CommonUtils.csproj", "{B9ABCA4D-5299-4645-9075-D3DAB6EB9209}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C715A9BF-09F6-49A0-AB60-FD9A0F4CEEE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67EB9D7C-19F8-4471-85AF-F8E3C6DE999B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67EB9D7C-19F8-4471-85AF-F8E3C6DE999B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67EB9D7C-19F8-4471-85AF-F8E3C6DE999B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67EB9D7C-19F8-4471-85AF-F8E3C6DE999B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9ABCA4D-5299-4645-9075-D3DAB6EB9209}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9ABCA4D-5299-4645-9075-D3DAB6EB9209}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9ABCA4D-5299-4645-9075-D3DAB6EB9209}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9ABCA4D-5299-4645-9075-D3DAB6EB9209}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
