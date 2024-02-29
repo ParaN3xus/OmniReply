@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -20,4 +20,8 @@
     <ProjectReference Include="..\OmniReply.MessageObjects\OmniReply.MessageObjects.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /Y /S &quot;$(TargetDir)*&quot; &quot;$(SolutionDir)OmniReply\bin\$(Configuration)\net8.0\&quot;" />
+  </Target>
+	
 </Project>

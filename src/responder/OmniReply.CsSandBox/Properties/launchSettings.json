@@ -2,7 +2,7 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "12345 111",
+      "commandLineArgs": "12345 7wauMD1CMw9d2ALS6uP45dcFBJtXKzXm",
       "workingDirectory": "E:\\Projects\\Hybrid\\bot_frame",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",
