@@ -1,15 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static OmniReply.Utils.Paths;
-using OmniReply.Core.CsScript;
 using System.Dynamic;
 using OmniReply.MessageObjects;
-using static OmniReply.Core.Channel;
 using OmniReply.Utils.Config;
+using static OmniReply.CommonUtils.Paths;
+using static OmniReply.Core.Channel;
+using static OmniReply.Utils.Exceptions;
 
 namespace OmniReply.Core
 {
@@ -18,20 +13,20 @@ namespace OmniReply.Core
         public static readonly List<Session> sessions = [];
 
         public string SessionId;
-        public bool isGroup;
+        public bool IsGroup;
         public List<Plugin> enabledPlugins = [];
 
-        private CsSandBox sandBox;
-        private SandBoxGlobals sandBoxGlobals;
         private string storageFolder;
         private SessionConfig sessionConfig;
+
+        private RemoteSandBox sandBox;
 
         public Session(string sessionId, bool isGroup)
         {
             sessions.Add(this);
 
-            this.SessionId = sessionId;
-            this.isGroup = isGroup;
+            SessionId = sessionId;
+            IsGroup = isGroup;
 
             var path = SessionsFolder + "/" + (isGroup ? "g/" : "");
             path += sessionId;
@@ -101,53 +96,33 @@ namespace OmniReply.Core
 
             initCode += pluginCode;
 
-            ExpandoObject sessionData = JsonConvert.DeserializeObject<ExpandoObject>(File.ReadAllText(storageFolder + "/sessionData.json"))!;
-            ExpandoObject globalData = JsonConvert.DeserializeObject<ExpandoObject>(File.ReadAllText(SessionsFolder + "/globalData.json"))!;
-
-            sandBoxGlobals = new SandBoxGlobals(sessionData, globalData);
-
-
-            // banned type
-            var bannedType = new List<Type>
-                            {
-                                //not allow to use 
-                                typeof(System.Reflection.Module),
-                                typeof(System.AppDomain),
-                                typeof(System.Diagnostics.Process),
-                                typeof(System.Threading.Thread),
-                            };
-
-            sandBox = new CsSandBox(initCode, references, bannedType, sandBoxGlobals, usingNamespaces.ToList());
+            try
+            {
+                sandBox = new RemoteSandBox((IsGroup ? "g/" : "") + SessionId, initCode, [.. references], [.. usingNamespaces]);
+            }
+            catch (Exception e)
+            {
+                sessions.Remove(this);
+                throw e;
+            }
         }
 
         public object? RunCode(string code, bool isTimeout = true)
         {
             object? res = null;
-            Thread scriptThread = new Thread(() =>
-            {
-                res = RunCodeProcess(code);
-            });
-            scriptThread.Start();
 
-            if (isTimeout)
+            try
             {
-                if (!scriptThread.Join(TimeSpan.FromSeconds(16)))
+                res = sandBox.RunAsync(code[1..], isTimeout).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                res = e.Message;
+                if (e is SandBoxTimeoutException)
                 {
-                    scriptThread.Interrupt();
-                    throw new OperationCanceledException("Timeout!");
+                    sessions.Remove(this);
                 }
             }
-            else
-            {
-                scriptThread.Join();
-            }
-
-            var sessionDataJson = sandBoxGlobals.GetSessionDataJson();
-            File.WriteAllText(storageFolder + "/sessionData.json", sessionDataJson);
-
-            var globalDataJson = sandBoxGlobals.GetGlobalDataJson();
-            File.WriteAllText(SessionsFolder + "/globalData.json", globalDataJson);
-
 
             if (res == null)
             {
@@ -181,19 +156,6 @@ namespace OmniReply.Core
             return null;
         }
 
-        private object? RunCodeProcess(string code)
-        {
-            object? res;
-            try
-            {
-                res = sandBox.RunAsync(code[1..]).GetAwaiter().GetResult();
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
-            return res;
-        }
 
         public bool isUserBanned(string id)
         {
@@ -208,7 +170,7 @@ namespace OmniReply.Core
         public void Reload()
         {
             Remove();
-            _ = new Session(SessionId, isGroup);
+            _ = new Session(SessionId, IsGroup);
         }
 
         public void Reset()
@@ -274,7 +236,7 @@ namespace OmniReply.Core
                     isGroup = true;
                 }
 
-                var session = sessions.FirstOrDefault(s => s.SessionId == id && s.isGroup == isGroup);
+                var session = sessions.FirstOrDefault(s => s.SessionId == id && s.IsGroup == isGroup);
 
                 if (session != null)
                 {
@@ -440,7 +402,7 @@ namespace OmniReply.Core
 
             if (!args.ContainsKey("s"))
             {
-                BanSession((isGroup ? "g/" : "") + SessionId, ban);
+                BanSession((IsGroup ? "g/" : "") + SessionId, ban);
             }
             else
             {
@@ -478,7 +440,7 @@ namespace OmniReply.Core
                     args["s"] = args["s"][2..];
                     isgroup = true;
                 }
-                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.isGroup == isgroup);
+                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.IsGroup == isgroup);
 
                 if (session == null)
                 {
@@ -501,7 +463,7 @@ namespace OmniReply.Core
             string s = string.Empty;
             foreach (var session in sessions)
             {
-                s += (session.isGroup ? "g/" : "") + session.SessionId;
+                s += (session.IsGroup ? "g/" : "") + session.SessionId;
                 if (session != sessions.Last())
                 {
                     s += Environment.NewLine;
@@ -530,7 +492,7 @@ namespace OmniReply.Core
                     args["s"] = args["s"][2..];
                     isgroup = true;
                 }
-                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.isGroup == isgroup);
+                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.IsGroup == isgroup);
 
                 if (session == null)
                 {
@@ -562,7 +524,7 @@ namespace OmniReply.Core
                     args["s"] = args["s"][2..];
                     isgroup = true;
                 }
-                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.isGroup == isgroup);
+                var session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.IsGroup == isgroup);
 
                 if (session == null)
                 {
@@ -639,7 +601,7 @@ namespace OmniReply.Core
                     args["s"] = args["s"][2..];
                     isgroup = true;
                 }
-                session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.isGroup == isgroup);
+                session = sessions.FirstOrDefault(s => s.SessionId == args["s"] && s.IsGroup == isgroup);
 
                 if (session == null)
                 {

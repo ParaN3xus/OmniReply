@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OmniReply.Utils.Log;
+using static OmniReply.CommonUtils.Log;
 using WatsonWebsocket;
 using OmniReply.MessageObjects;
 
@@ -19,7 +19,7 @@ namespace OmniReply.Core
         {
             msgResponder = responder;
             
-            wsServer = new WatsonWsServer("*", 8123, false);
+            wsServer = new WatsonWsServer("localhost", 8123, false);
 
             wsServer.ClientConnected += ClientConnected;
             wsServer.ClientDisconnected += ClientDisconnected;

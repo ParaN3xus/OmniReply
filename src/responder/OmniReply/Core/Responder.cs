@@ -45,7 +45,7 @@ namespace OmniReply.Core
             try
             {
                 // search corresponding session, if not found, create a new one
-                var session = Session.sessions.FirstOrDefault(s => s.SessionId == sessionId && s.isGroup == isGroup);
+                var session = Session.sessions.FirstOrDefault(s => s.SessionId == sessionId && s.IsGroup == isGroup);
                 if (session == null)
                 {
                     session = new Session(sessionId, isGroup);

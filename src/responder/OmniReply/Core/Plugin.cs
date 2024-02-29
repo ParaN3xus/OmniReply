@@ -6,8 +6,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using static OmniReply.Utils.Log;
-using static OmniReply.Utils.Paths;
+using static OmniReply.CommonUtils.Log;
+using static OmniReply.CommonUtils.Paths;
 using OmniReply.Utils.Config;
 
 namespace OmniReply.Core

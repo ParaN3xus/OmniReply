@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OmniReply.CommonUtils\OmniReply.CommonUtils.csproj" />
     <ProjectReference Include="..\OmniReply.MessageObjects\OmniReply.MessageObjects.csproj" />
   </ItemGroup>
 
