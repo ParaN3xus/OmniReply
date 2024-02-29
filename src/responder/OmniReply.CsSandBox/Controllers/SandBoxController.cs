@@ -50,7 +50,7 @@ namespace OmniReply.CsSandBox.Controllers
 
                 return new CommonResponse
                 {
-                    Type = (int)ResultType.String,
+                    Type = (int)CommonResponse.ResponseType.String,
                     Data = result.ToString()
                 };
             }

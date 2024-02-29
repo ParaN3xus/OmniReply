@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 using OmniReply.CsSandBox.Services;
+using Microsoft.AspNetCore.Connections;
 
 namespace OmniReply.CsSandBox
 {
@@ -30,7 +31,24 @@ namespace OmniReply.CsSandBox
             // Configure the HTTP request pipeline.
             app.UseAuthorization();
             app.MapControllers();
-            app.Run();
+
+            try
+            {
+                app.Run();
+            }
+            catch (Exception e)
+            {
+                if(e.InnerException is AddressInUseException)
+                {
+                    Console.WriteLine("[PORTINUSE]");
+                    return -2;
+                }
+                else
+                {
+                    Console.WriteLine("[FAILED]");
+                    return -3;
+                }
+            }
 
             return 0;
         }
