@@ -24,6 +24,12 @@ namespace OmniReply.CsSandBox.Controllers
                 return CommonResponse.FromException(new Exception("Not inited yet!"));
             }
 
+            if(key != _sandBoxService.Key)
+            {
+                // just kidding
+                return CommonResponse.OkWithNull;
+            }
+
             try
             {
                 var result = await _sandBoxService.SandBox.RunAsync(code);
