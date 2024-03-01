@@ -103,6 +103,7 @@ namespace OmniReply.Core
             catch (Exception e)
             {
                 sessions.Remove(this);
+                //sandBox.Dispose();
                 throw e;
             }
         }
