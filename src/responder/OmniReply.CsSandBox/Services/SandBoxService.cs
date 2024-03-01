@@ -16,7 +16,6 @@ namespace OmniReply.CsSandBox.Services
         private ExpandoObject sessionData;
         private ExpandoObject globalData;
 
-
         private string storageFolder;
 
         public SandBoxService(string key)
@@ -31,7 +30,7 @@ namespace OmniReply.CsSandBox.Services
             sessionData = JsonConvert.DeserializeObject<ExpandoObject>(File.ReadAllText(storageFolder + "/sessionData.json"))!;
             globalData = JsonConvert.DeserializeObject<ExpandoObject>(File.ReadAllText(Paths.SessionsFolder + "/globalData.json"))!;
 
-            Globals = new SandBoxGlobals(sessionData, globalData);
+            Globals = new SandBoxGlobals(sessionData, globalData, initData.SessionId);
 
             SandBox = new SandBox(initData, Globals);
         }
