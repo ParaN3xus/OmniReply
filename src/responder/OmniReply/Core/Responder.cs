@@ -73,7 +73,7 @@ namespace OmniReply.Core
             }
             catch (Exception e)
             {
-                result = e.Message;
+                result = e.Message + e.StackTrace;
             }
 
             // check if result is invaild

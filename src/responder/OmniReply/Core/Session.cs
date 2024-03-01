@@ -100,11 +100,11 @@ namespace OmniReply.Core
             {
                 sandBox = new RemoteSandBox((IsGroup ? "g/" : "") + SessionId, initCode, [.. references], [.. usingNamespaces]);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 sessions.Remove(this);
                 //sandBox.Dispose();
-                throw e;
+                throw;
             }
         }
 

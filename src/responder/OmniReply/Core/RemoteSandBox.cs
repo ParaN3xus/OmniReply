@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using OmniReply.CommonUtils;
 using OmniReply.CommonUtils.SandBoxTransferTypes;
+using OmniReply.MessageObjects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -38,7 +39,6 @@ namespace OmniReply.Core
             key = new(stringChars);
 
         port:
-            
             port = random.Next(10000, 65535);
 
             sandBoxProcess = new Process();
@@ -47,15 +47,10 @@ namespace OmniReply.Core
             sandBoxProcess.StartInfo.UseShellExecute = false;
             sandBoxProcess.StartInfo.RedirectStandardOutput = true;
 
-            sandBoxProcess.ErrorDataReceived += (sender, e) =>
-            {
-                Log.WriteLog($"SandBox process err: {e.Data}", Log.LogLevel.Error);
-            };
-
             sandBoxProcess.Start();
 
             string? s;
-            bool flag = false;
+            bool flag = true;
 
             while (flag)
             {
@@ -65,7 +60,7 @@ namespace OmniReply.Core
                     continue;
                 }
 
-                if (s.Contains("Content root path:"))
+                if (s.Contains("Now listening on"))
                 {
                     flag = false;
                 }
@@ -81,11 +76,15 @@ namespace OmniReply.Core
                 }
             }
 
-            sandBoxProcess.OutputDataReceived += (sender, e) =>
+            new Thread(() =>
             {
-                ;
-            };
-            
+                while (true)
+                {
+                    Thread.Sleep(10);
+                    sandBoxProcess.StandardOutput.ReadLine();
+                }
+            }).Start();
+
             httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri($"http://localhost:{port}");
 
@@ -94,14 +93,20 @@ namespace OmniReply.Core
             {
                 try
                 {
-                    var response = httpClient.GetAsync("/run").GetAwaiter().GetResult();
+                    if(sandBoxProcess.HasExited)
+                    {
+                        throw new Exception("SandBox process exited!");
+                    }
+                    httpClient.GetAsync("/run").GetAwaiter().GetResult();
                     break;
                 }
                 catch
                 {
                     Thread.Sleep(50);
                 }
-            }   
+            }
+
+            Log.WriteLog($"SandBox started at http://localhost:{port} with key {key}.", Log.LogLevel.Debug);
 
             SendInitRequest(sessionId, initCode, references, usingNamesapces);
         }
@@ -186,7 +191,7 @@ namespace OmniReply.Core
 
             if (result.Type == (int)CommonResponse.ResponseType.MessageParts)
             {
-                return result.Data!;
+                return ((Newtonsoft.Json.Linq.JArray)result.Data).ToObject<List<MessagePart>>()!;
             }
 
             throw new Exception("Failed to run the code");
@@ -194,7 +199,10 @@ namespace OmniReply.Core
 
         public void Dispose()
         {
-            sandBoxProcess.Kill();
+            if(!sandBoxProcess.HasExited)
+            {
+                sandBoxProcess.Kill();
+            }
         }
     }
 }
