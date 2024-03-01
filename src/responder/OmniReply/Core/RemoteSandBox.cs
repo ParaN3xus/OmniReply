@@ -50,8 +50,6 @@ namespace OmniReply.Core
             string? s;
             bool flag = false;
 
-            Thread.Sleep(1000);
-
             while (flag)
             {
                 s = sandBoxProcess.StandardOutput.ReadLine();
