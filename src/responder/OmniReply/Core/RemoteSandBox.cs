@@ -28,87 +28,95 @@ namespace OmniReply.Core
 
         public RemoteSandBox(string sessionId, string initCode, List<string> references, List<string> usingNamesapces)
         {
-            var stringChars = new char[32];
-            var random = new Random();
-
-            for (int i = 0; i < stringChars.Length; i++)
+            try
             {
-                stringChars[i] = chars[random.Next(chars.Length)];
-            }
+                var stringChars = new char[32];
+                var random = new Random();
 
-            key = new(stringChars);
-
-        port:
-            port = random.Next(10000, 65535);
-
-            sandBoxProcess = new Process();
-            sandBoxProcess.StartInfo.FileName = "OmniReply.CsSandBox" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty);
-            sandBoxProcess.StartInfo.Arguments = $"{port} {key}";
-            sandBoxProcess.StartInfo.UseShellExecute = false;
-            sandBoxProcess.StartInfo.RedirectStandardOutput = true;
-
-            sandBoxProcess.Start();
-
-            string? s;
-            bool flag = true;
-
-            while (flag)
-            {
-                s = sandBoxProcess.StandardOutput.ReadLine();
-                if(s == null)
+                for (int i = 0; i < stringChars.Length; i++)
                 {
-                    continue;
+                    stringChars[i] = chars[random.Next(chars.Length)];
                 }
 
-                if (s.Contains("Now listening on"))
-                {
-                    flag = false;
-                }
-                else if (s == "[PORTINUSE]")
-                {
-                    sandBoxProcess.Kill();
-                    goto port;
-                }
-                else if (s == "[FAILED]")
-                {
-                    sandBoxProcess.Kill();
-                    throw new Exception("Failed to start the sandbox");
-                }
-            }
+                key = new(stringChars);
 
-            new Thread(() =>
-            {
+            port:
+                port = random.Next(10000, 65535);
+
+                sandBoxProcess = new Process();
+                sandBoxProcess.StartInfo.FileName = "OmniReply.CsSandBox" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty);
+                sandBoxProcess.StartInfo.Arguments = $"{port} {key}";
+                sandBoxProcess.StartInfo.UseShellExecute = false;
+                sandBoxProcess.StartInfo.RedirectStandardOutput = true;
+
+                sandBoxProcess.Start();
+
+                string? s;
+                bool flag = true;
+
+                while (flag)
+                {
+                    s = sandBoxProcess.StandardOutput.ReadLine();
+                    if (s == null)
+                    {
+                        continue;
+                    }
+
+                    if (s.Contains("Now listening on"))
+                    {
+                        flag = false;
+                    }
+                    else if (s == "[PORTINUSE]")
+                    {
+                        sandBoxProcess.Kill();
+                        goto port;
+                    }
+                    else if (s == "[FAILED]")
+                    {
+                        sandBoxProcess.Kill();
+                        throw new Exception("Failed to start the sandbox");
+                    }
+                }
+
+                new Thread(() =>
+                {
+                    while (true)
+                    {
+                        Thread.Sleep(10);
+                        sandBoxProcess.StandardOutput.ReadLine();
+                    }
+                }).Start();
+
+                httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri($"http://localhost:{port}");
+
+                // wait until inited
                 while (true)
                 {
-                    Thread.Sleep(10);
-                    sandBoxProcess.StandardOutput.ReadLine();
-                }
-            }).Start();
-
-            httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri($"http://localhost:{port}");
-
-            // wait until inited
-            while(true)
-            {
-                try
-                {
-                    if(sandBoxProcess.HasExited)
+                    try
                     {
-                        throw new Exception("SandBox process exited!");
+                        if (sandBoxProcess.HasExited)
+                        {
+                            throw new Exception("SandBox process exited!");
+                        }
+                        httpClient.GetAsync("/run").GetAwaiter().GetResult();
+                        break;
                     }
-                    httpClient.GetAsync("/run").GetAwaiter().GetResult();
-                    break;
+                    catch
+                    {
+                        Thread.Sleep(50);
+                    }
                 }
-                catch
-                {
-                    Thread.Sleep(50);
-                }
+
+                Log.WriteLog($"SandBox started at http://localhost:{port} with key {key}.", Log.LogLevel.Debug);
+
+                SendInitRequest(sessionId, initCode, references, usingNamesapces);
             }
-
-            Log.WriteLog($"SandBox started at http://localhost:{port} with key {key}.", Log.LogLevel.Debug);
-
-            SendInitRequest(sessionId, initCode, references, usingNamesapces);
+            catch (Exception)
+            {
+                Dispose();
+                throw;
+            }
         }
 
         private void SendInitRequest(string sessionId, string initCode, List<string> references, List<string> usingNamesapces)
@@ -134,7 +142,7 @@ namespace OmniReply.Core
             {
                 throw new Exception("Failed to init the sandbox");
             }
-            if( result.Type == (int)CommonResponse.ResponseType.Exception)
+            if (result.Type == (int)CommonResponse.ResponseType.Exception)
             {
                 throw new Exception(result.Data!.ToString());
             }
@@ -155,7 +163,7 @@ namespace OmniReply.Core
                 var url = $"/run?key={key}&code={System.Net.WebUtility.UrlEncode(code)}";
                 response = await httpClient.GetAsync(url, cts.Token);
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 sandBoxProcess.Kill();
                 throw new SandBoxTimeoutException();
@@ -199,9 +207,26 @@ namespace OmniReply.Core
 
         public void Dispose()
         {
-            if(!sandBoxProcess.HasExited)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
             {
-                sandBoxProcess.Kill();
+                if (sandBoxProcess != null)
+                {
+                    if (!sandBoxProcess.HasExited)
+                    {
+                        sandBoxProcess.Kill();
+                    }
+                }
+
+                if (httpClient != null)
+                {
+                    httpClient.Dispose();
+                }
             }
         }
     }

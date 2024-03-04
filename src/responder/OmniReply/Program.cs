@@ -21,7 +21,7 @@ namespace OmniReply
             var isConsoleIn = Console.In.Peek() != -1;
             while (isConsoleIn)
             {
-                string msg;
+                string? msg;
 
                 try
                 {

@@ -103,7 +103,6 @@ namespace OmniReply.Core
             catch (Exception)
             {
                 sessions.Remove(this);
-                //sandBox.Dispose();
                 throw;
             }
         }
@@ -166,6 +165,7 @@ namespace OmniReply.Core
         public void Remove()
         {
             sessions.Remove(this);
+            this.sandBox.Dispose();
         }
 
         public void Reload()

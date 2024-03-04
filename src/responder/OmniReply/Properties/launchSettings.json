@@ -2,7 +2,6 @@
   "profiles": {
     "OmniReply": {
       "commandName": "Project",
-      "workingDirectory": "E:\\Projects\\Hybrid\\bot_frame",
       "remoteDebugEnabled": false
     }
   }
