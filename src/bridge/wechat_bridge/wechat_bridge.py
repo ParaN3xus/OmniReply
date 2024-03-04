@@ -5,6 +5,7 @@ import string
 import threading
 import time
 import websocket
+import logging
 import base64
 from time import sleep
 from enum import Enum
@@ -14,7 +15,7 @@ from io import BytesIO
 import lib.itchat as itchat
 from lib.itchat.content import *
 
-ws_uri = "ws://localhost:8080"
+ws_uri = "ws://localhost:8123"
 ws = websocket.WebSocket()
 
 class message_type(Enum):
@@ -36,11 +37,11 @@ def connect_to_websocket():
     while True:
         try:
             ws.connect(ws_uri)
-            print(f"Connected to {ws_uri}")
+            logging.info(f"Connected to {ws_uri}")
             give_id("wechat")
             break
         except Exception as e:
-            print(f"Failed to connect to WebSocket: {e}. Retrying...")
+            logging.error(f"Failed to connect to WebSocket: {e}. Retrying...")
             sleep(3)
     connecting = False
     
@@ -48,9 +49,9 @@ def connect_to_websocket():
 def send_to_websocket(message):
     try:
         ws.send(message)
-        print(f"Sent to WebSocket: {message}")
+        logging.info(f"Sent to WebSocket: {message[-50:] if len(message) > 50 else message}")
     except:
-        print("WebSocket connection closed. Reconnecting...")
+        logging.error("WebSocket connection closed. Reconnecting...")
         connect_to_websocket()
 
 def receive_from_websocket():
@@ -60,7 +61,7 @@ def receive_from_websocket():
             json_response = json.loads(response.decode(encoding='utf-8'))
             react_to_host(json_response)
         except Exception as e:
-            print("WebSocket connection closed. Reconnecting...")
+            logging.error("WebSocket connection closed. Reconnecting...")
             connect_to_websocket()
 
 def send_text_to_wechat(receiver, message):
@@ -148,15 +149,17 @@ def on_chat_message(msg):
 
 if __name__ == '__main__':
     global login_time
-    
-    itchat.auto_login(hotReload=True)
+
+    itchat.auto_login(hotReload=True, enableCmdQR=2)
     login_time = time.time()
 
     connect_to_websocket()
 
-    th1 = threading.Thread(target=receive_from_websocket)
-    th1.start()
+    ws_thread = threading.Thread(target=receive_from_websocket)
+    ws_thread.start()
 
-    itchat.run(True)
+    itchat.run(False)
 
-    th1.join()
+    while True:
+        sleep(1000)
+

@@ -1,4 +1,3 @@
-from io import BytesIO
 import json
 import os
 import random
@@ -6,8 +5,10 @@ import string
 import threading
 import requests
 import websocket
+import logging
 import base64
 from time import sleep
+from io import BytesIO
 from enum import Enum
 from PIL import Image
 
@@ -46,20 +47,20 @@ def connect_to_websocket():
     while True:
         try:
             ws.connect(ws_uri)
-            print(f"Connected to {ws_uri}")
+            logging.info(f"Connected to {ws_uri}")
             give_id("mirai")
             break
         except Exception as e:
-            print(f"Failed to connect to WebSocket: {e}. Retrying...")
+            logging.error(f"Failed to connect to WebSocket: {e}. Retrying...")
             sleep(3)
     connecting = False
 
 def send_to_websocket(message):
     try:
         ws.send(message)
-        print(f"Sent to WebSocket: {message}")
+        logging.info(f"Sent to WebSocket: {message}")
     except:
-        print("WebSocket connection closed. Reconnecting...")
+        logging.error("WebSocket connection closed. Reconnecting...")
         connect_to_websocket()
 
 def receive_from_websocket():
@@ -69,7 +70,7 @@ def receive_from_websocket():
             json_response = json.loads(response.decode(encoding='utf-8'))
             react_to_host(json_response)
         except Exception as e:
-            print("WebSocket connection closed. Reconnecting...")
+            logging.error("WebSocket connection closed. Reconnecting...")
             connect_to_websocket()
 
 
@@ -114,7 +115,7 @@ def download_file_to_base64(url):
         base64_str = base64.b64encode(response.content).decode("utf-8")
         return base64_str
     else:
-        print('Failed to download file, status code:', response.status_code)
+        logging.error('Failed to download file, status code:', response.status_code)
         return None
 
 def save_base64_to_file(base64_str):
@@ -170,14 +171,15 @@ def hello_to_group(bot: miraicle.Mirai, msg: miraicle.GroupMessage):
 def hello_to_friend(bot: miraicle.Mirai, msg: miraicle.FriendMessage):
     send_chat_message_to_host(None, msg.sender, msg, False)
 
-
 if __name__ == '__main__':
     connect_to_websocket()
 
-    th1 = threading.Thread(target=receive_from_websocket)
-    th1.daemon = True
-    th1.start()
+    thread_ws = threading.Thread(target=receive_from_websocket)
 
-    bot.run()
+    thread_bot = threading.Thread(target=bot.run)
 
-    th1.join()
+    thread_ws.start()
+    thread_bot.start()
+
+    while True:
+        sleep(1000)
