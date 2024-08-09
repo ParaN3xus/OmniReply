@@ -5,6 +5,7 @@ using OmniReply.Utils.Config;
 using static OmniReply.CommonUtils.Paths;
 using static OmniReply.Core.Channel;
 using static OmniReply.Utils.Exceptions;
+using OmniReply.CommonUtils;
 
 namespace OmniReply.Core
 {
@@ -15,7 +16,8 @@ namespace OmniReply.Core
         public string SessionId;
         public bool IsGroup;
         public List<Plugin> enabledPlugins = [];
-
+        
+        private static List<string> knownCommands = ["help", "session", "plugman", "ban"];
         private string storageFolder;
         private SessionConfig sessionConfig;
 
@@ -109,6 +111,7 @@ namespace OmniReply.Core
 
         public object? RunCode(string code, bool isTimeout = true)
         {
+            Log.WriteLog("Running code: " + code, Log.LogLevel.Info);
             object? res = null;
 
             try
@@ -276,6 +279,10 @@ namespace OmniReply.Core
             }
 
             args["command"] = q.Dequeue();
+
+            if (!(knownCommands.Contains(args["command"]))){
+                return string.Empty;
+            }
 
             while(q.Count > 0)
             {
