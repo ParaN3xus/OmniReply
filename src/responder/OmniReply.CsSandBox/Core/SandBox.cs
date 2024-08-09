@@ -19,6 +19,7 @@ namespace OmniReply.CsSandBox.Core
                                 typeof(System.AppDomain),
                                 typeof(System.Diagnostics.Process),
                                 typeof(System.Threading.Thread),
+                                typeof(System.Environment)
                             };
 
         private List<Type> block_call_type;
