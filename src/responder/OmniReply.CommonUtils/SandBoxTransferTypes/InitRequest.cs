@@ -25,4 +25,13 @@ namespace OmniReply.CommonUtils.SandBoxTransferTypes
         [JsonProperty("using_namespaces")]
         public List<string> UsingNamespaces;
     }
+    
+    public class RunRequest
+    {
+        [JsonProperty("key")]
+        public string Key;
+
+        [JsonProperty("code")]
+        public string Code;
+    }
 }

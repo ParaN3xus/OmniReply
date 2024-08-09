@@ -108,7 +108,7 @@ namespace OmniReply.Core
                     }
                 }
 
-                Log.WriteLog($"SandBox started at http://localhost:{port} with key {key}.", Log.LogLevel.Debug);
+                Log.WriteLog($"SandBox started at http://localhost:{port} with key {key}.", Log.LogLevel.Info);
 
                 SendInitRequest(sessionId, initCode, references, usingNamesapces);
             }
@@ -160,8 +160,16 @@ namespace OmniReply.Core
 
             try
             {
-                var url = $"/run?key={key}&code={System.Net.WebUtility.UrlEncode(code)}";
-                response = await httpClient.GetAsync(url, cts.Token);
+                var runRequest = new RunRequest
+                {
+                    Key = key,
+                    Code = code
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(runRequest);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                response = await httpClient.PostAsync("/run", content, cts.Token);
             }
             catch (TaskCanceledException)
             {

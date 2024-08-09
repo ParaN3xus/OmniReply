@@ -16,9 +16,12 @@ namespace OmniReply.CsSandBox.Controllers
             _sandBoxService = runService;
         }
 
-        [HttpGet("run")]
-        public async Task<CommonResponse> Get(string key, string code)
+        [HttpPost("run")]
+        public async Task<CommonResponse> Get([FromBody] RunRequest data)
         {
+            var key = data.Key;
+            var code = data.Code;
+            
             if(_sandBoxService.SandBox == null)
             {
                 return CommonResponse.FromException(new Exception("Not inited yet!"));
