@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Serialization;
 using OmniReply.CsSandBox.Services;
 using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace OmniReply.CsSandBox
 {
@@ -18,6 +19,18 @@ namespace OmniReply.CsSandBox
             var key = args[1];
 
             var builder = WebApplication.CreateBuilder();
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 52428800; // 50 MB
+                options.Limits.MaxRequestLineSize = 52428800;
+                options.Limits.MaxRequestHeadersTotalSize = 52428800;
+                options.Limits.MaxRequestBufferSize = 52428801;
+            });
+
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 52428800;
+            });
 
             // Add services to the container.
             builder.Services.AddSingleton(new SandBoxService(key));
