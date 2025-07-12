@@ -19,7 +19,7 @@ namespace OmniReply.Core
         {
             msgResponder = responder;
             
-            wsServer = new WatsonWsServer("localhost", 8123, false);
+            wsServer = new WatsonWsServer("*", 8123, false);
 
             wsServer.ClientConnected += ClientConnected;
             wsServer.ClientDisconnected += ClientDisconnected;
@@ -110,6 +110,8 @@ namespace OmniReply.Core
         public void SendMessage(Guid clientId, SendingMessage msg)
         {
             var json = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(msg));
+
+            WriteLog($"Sending message to {clientId}: {Encoding.UTF8.GetString(json)[^Math.Min(json.Length, 16)..]}", LogLevel.Info);
 
             wsServer.SendAsync(clientId, json);
         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static OmniReply.Core.Channel;
+using static OmniReply.CommonUtils.Log;
 using OmniReply.Utils.Config;
 
 namespace OmniReply.Core
@@ -34,6 +35,7 @@ namespace OmniReply.Core
             // banned session
             if(GlobalConfig.globalConfig.BannedSessions.Contains((isGroup ? "g/" : "") + sessionId))
             {
+                WriteLog($"Banned session: {sessionId}", LogLevel.Info);
                 return;
             }
 
@@ -48,19 +50,21 @@ namespace OmniReply.Core
                 var session = Session.sessions.FirstOrDefault(s => s.SessionId == sessionId && s.IsGroup == isGroup);
                 if (session == null)
                 {
+                    WriteLog($"Session not found: {sessionId}, creating...", LogLevel.Info);
                     session = new Session(sessionId, isGroup);
                 }
 
                 // banned user
                 if (session.isUserBanned(sender.UserId))
                 {
+                    WriteLog($"Banned User: {sender.UserId}", LogLevel.Info);
                     return;
                 }
 
                 // run the code
                 if(msgText.StartsWith('$'))
                 {
-                    result = session.RunCode(msgText);
+                    result = session.RunCode(msgText, true);
                 }
                 else if(msgText.StartsWith('#'))
                 {
@@ -79,6 +83,7 @@ namespace OmniReply.Core
             // check if result is invaild
             if ((result == null) || (result.ToString() == string.Empty && msgText.StartsWith('#')))
             {
+                WriteLog("Invalid result", LogLevel.Warning);
                 return;
             }
 
