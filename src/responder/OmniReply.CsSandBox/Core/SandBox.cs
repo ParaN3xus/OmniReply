@@ -43,7 +43,18 @@ namespace OmniReply.CsSandBox.Core
             var assembliesToAdd = new List<Assembly>();
             foreach (var reference in references)
             {
-                var loadedAssembly = Assembly.Load(reference);
+                Assembly loadedAssembly;
+
+                try
+                {
+                    loadedAssembly = File.Exists(reference) ? Assembly.LoadFrom(reference) : Assembly.Load(reference);
+                }
+                catch (Exception e)
+                {
+                    Log.WriteLog($"Error when loading assembly: {reference}", Log.LogLevel.Error);
+                    throw;
+                }
+                
                 if (loadedAssembly != null)
                 {
                     assembliesToAdd.Add(loadedAssembly);

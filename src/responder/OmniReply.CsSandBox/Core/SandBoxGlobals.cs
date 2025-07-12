@@ -30,12 +30,12 @@ namespace OmniReply.CsSandBox.Core
             globalDataPath = Paths.SessionsFolder + "/globalData.json";
         }
 
-        internal string GetSessionDataJson()
+        public string GetSessionDataJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(sessionData);
         }
 
-        internal string GetGlobalDataJson()
+        public string GetGlobalDataJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(globalData);
         }
